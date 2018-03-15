@@ -6,8 +6,17 @@ import socket
 import os
 import struct
 import logging
+import sys
 
 log = logging.getLogger(__name__)
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s: %(message)s')
+file_handler = logging.FileHandler("socket.log")
+file_handler.setFormatter(formatter)  # 可以通过setFormatter指定输出格式
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.formatter = formatter
+log.addHandler(file_handler)
+log.addHandler(console_handler)
+log.setLevel(logging.INFO)
 
 STRUCT_FMT = '128sl'
 
@@ -30,7 +39,6 @@ class socket_server_handler(socket_server.BaseRequestHandler):
                     STRUCT_FMT, self.buf)
                 self.filename = self.filename.decode(
                     'utf-8').strip('\\x00').replace('\0', '')
-                log.info(">>> syncing file %s", self.filename)
                 recvd_size = 0
                 file = open(self.filename, 'wb')
             while not recvd_size == self.filesize:
@@ -42,7 +50,7 @@ class socket_server_handler(socket_server.BaseRequestHandler):
                     recvd_size = self.filesize
                 file.write(rdata)
             file.close()
-            log.info(">>> %s sync success!", self.filename)
+        log.info("sync file [%s] success!", self.filename)
 
 
 class replication(object):
@@ -59,10 +67,19 @@ class replication(object):
             self.address, socket_server_handler)
         tcpServ.serve_forever()
 
-    def start_repl_client(self, file_path):
+    @staticmethod
+    def send_file(address, file_list):
+        if len(file_list) == 0:
+            log.error("there is no file to sync!")
+        else:
+            for file in file_list:
+                replication.start_repl_client(address, file)
+
+    @staticmethod
+    def start_repl_client(address, file_path):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if os.path.isfile(file_path):
-            s.connect(self.address)
+            s.connect(address)
             # 定义文件头信息，包含文件名和文件大小
             file_head = struct.pack(STRUCT_FMT, os.path.basename(
                 file_path).encode('utf-8'), os.stat(file_path).st_size)
@@ -74,7 +91,7 @@ class replication(object):
                     break
                 s.send(filedata)
             file.close()
-            log.info(">>> %s sync success!", os.path.dirname(file_path))
+            log.info("sync file [%s] success!", os.path.basename(file_path))
 
     @staticmethod
     def check_address(address):
