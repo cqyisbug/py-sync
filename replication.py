@@ -5,7 +5,6 @@ import socketserver as socket_server
 import socket
 import os
 import struct
-import time
 import logging
 
 log = logging.getLogger(__name__)
@@ -20,7 +19,6 @@ class socket_server_handler(socket_server.BaseRequestHandler):
         self.filesize = None
         socket_server.BaseRequestHandler.__init__(self, request, client_address, server)
 
-
     def handle(self):
         log.info("repl connected from : %s", self.client_address)
         while True:
@@ -29,7 +27,7 @@ class socket_server_handler(socket_server.BaseRequestHandler):
             if self.buf:
                 self.filename, self.filesize = struct.unpack(
                     STRUCT_FMT, self.buf)
-                self.filename = self.filename.decode('utf-8').strip('\\x00').replace('\0','')
+                self.filename = self.filename.decode('utf-8').strip('\\x00').replace('\0', '')
                 log.info(">>> syncing file %s", self.filename)
                 recvd_size = 0
                 file = open(self.filename, 'wb')
