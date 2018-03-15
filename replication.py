@@ -17,7 +17,8 @@ class socket_server_handler(socket_server.BaseRequestHandler):
         self.buf = None
         self.filename = None
         self.filesize = None
-        socket_server.BaseRequestHandler.__init__(self, request, client_address, server)
+        socket_server.BaseRequestHandler.__init__(
+            self, request, client_address, server)
 
     def handle(self):
         log.info("repl connected from : %s", self.client_address)
@@ -27,7 +28,8 @@ class socket_server_handler(socket_server.BaseRequestHandler):
             if self.buf:
                 self.filename, self.filesize = struct.unpack(
                     STRUCT_FMT, self.buf)
-                self.filename = self.filename.decode('utf-8').strip('\\x00').replace('\0', '')
+                self.filename = self.filename.decode(
+                    'utf-8').strip('\\x00').replace('\0', '')
                 log.info(">>> syncing file %s", self.filename)
                 recvd_size = 0
                 file = open(self.filename, 'wb')
@@ -57,11 +59,10 @@ class replication(object):
             self.address, socket_server_handler)
         tcpServ.serve_forever()
 
-    def start_repl_client(self, address, file_path):
+    def start_repl_client(self, file_path):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # s.connect(address)
         if os.path.isfile(file_path):
-            s.connect(address)
+            s.connect(self.address)
             # 定义文件头信息，包含文件名和文件大小
             file_head = struct.pack(STRUCT_FMT, os.path.basename(
                 file_path).encode('utf-8'), os.stat(file_path).st_size)
@@ -74,3 +75,12 @@ class replication(object):
                 s.send(filedata)
             file.close()
             log.info(">>> %s sync success!", os.path.dirname(file_path))
+
+    @staticmethod
+    def check_address(address):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect(address)
+            return True
+        except Exception:
+            return False
