@@ -11,7 +11,7 @@ import sys
 log = logging.getLogger(__name__)
 formatter = logging.Formatter('%(asctime)s %(levelname)-8s: %(message)s')
 file_handler = logging.FileHandler("socket.log")
-file_handler.setFormatter(formatter)  # 可以通过setFormatter指定输出格式
+file_handler.setFormatter(formatter)
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.formatter = formatter
 log.addHandler(file_handler)
