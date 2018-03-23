@@ -50,7 +50,7 @@ class socket_server_handler(socket_server.BaseRequestHandler):
                     recvd_size = self.filesize
                 file.write(rdata)
             file.close()
-        log.info("sync file [%s] success!", self.filename)
+            log.info("sync file [%s] success!", self.filename)
 
 
 class replication(object):
