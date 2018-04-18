@@ -18,11 +18,9 @@ file_map =  {}
 def monitor(path):
     if os.path.isdir(path):
         for root, dirs, files in os.walk(path):
-            if root != path:
-                print(root)
-                print(path)
             for d in dirs:
-                monitor(os.path.join(path, d))
+                pass
+                # monitor(os.path.join(path, d))
             for f in files:
                 if file_map.__contains__(hash(os.path.join(root, f)))and file_map[os.path.join(root, f)] == md5(os.path.join(root, f)):
                     pass
@@ -39,7 +37,6 @@ def md5(file):
     return md5_
 
 
-while True:
-    monitor(r"D:\cmder")
-    print(file_map)
-    pass
+# print(os.list)
+monitor(r"C:\Users\Administrator\Desktop\github\py-sync")
+print(file_map)
