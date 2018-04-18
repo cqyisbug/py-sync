@@ -1,37 +1,35 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+# !/usr/bin/env python
+# -  *  - coding:UTF-8 -  *  - 
 
-#         Constant
-QUE_MAX = 999999
 
 import os
 import queue
 import hashlib
-import time
 
+#         Constant
+QUE_MAX = 999999
 
 global q
 global file_map
 q = queue.Queue(QUE_MAX)
-file_map = {}
+file_map =  {}
 
 
 def monitor(path):
     if os.path.isdir(path):
         for root, dirs, files in os.walk(path):
+            if root != path:
+                print(root)
+                print(path)
             for d in dirs:
-                monitor(d)
+                monitor(os.path.join(path, d))
             for f in files:
-                if file_map.__contains__(hash(f)) and file_map[f] == md5(f):
+                if file_map.__contains__(hash(os.path.join(root, f)))and file_map[os.path.join(root, f)] == md5(os.path.join(root, f)):
                     pass
                 else:
-                    print("{0} changed".format(f))
-                    file_map.setdefault(f, md5(f))
-                    q.put(f)
-            # if os.path.isfile(f):
-                
-            # else:
-            #     monitor(f)
+                    print("{0} changed".format(os.path.join(root, f)))
+                    file_map.setdefault(os.path.join(root, f), md5(os.path.join(root, f)))
+                    q.put(os.path.join(root, f))
 
 
 def md5(file):
@@ -42,6 +40,6 @@ def md5(file):
 
 
 while True:
-    monitor(r"C:\Users\c15367\Desktop\github\py-sync")
-    time.sleep(10)
+    monitor(r"D:\cmder")
+    print(file_map)
     pass
