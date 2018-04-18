@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 # -*- codeing:UTF-8 -*-
-# author caiqy 20180315
+# author caiqyxyx 20180315
 
 import socketserver as socket_server
 import socket
@@ -30,15 +31,14 @@ class socket_server_handler(socket_server.BaseRequestHandler):
             self, request, client_address, server)
 
     def handle(self):
-        log.info("repl connected from : %s", self.client_address)
+        log.info("replication connected from : %s", self.client_address)
         while True:
             file_info_size = struct.calcsize(STRUCT_FMT)
             self.buf = self.request.recv(file_info_size)
             if self.buf:
                 self.filename, self.filesize = struct.unpack(
                     STRUCT_FMT, self.buf)
-                self.filename = self.filename.decode(
-                    'utf-8').strip('\\x00').replace('\0', '')
+                self.filename = self.filename.decode('utf-8').strip('\\x00').replace('\0', '')
                 recvd_size = 0
                 file = open(self.filename, 'wb')
             while not recvd_size == self.filesize:
